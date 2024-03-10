@@ -1,4 +1,4 @@
-import './assets/scss/app.scss';
+import '@/assets/scss/app.scss';
 import reactLogo from '/assets/images/react.svg';
 import viteLogo from '/assets/images/vite.svg';
 
