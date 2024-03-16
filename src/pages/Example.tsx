@@ -1,5 +1,5 @@
 import '@/assets/scss/pages/example.scss';
-import { useTodoList } from '@/hooks/example.hook';
+import { useTodoList, useTodoDetail } from '@/hooks/example.hook';
 import { useLoadingStore } from '@/stores/loading.store';
 import { useEffect } from 'react';
 import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
@@ -53,6 +53,27 @@ export function ExampleIndex() {
 export function ExampleDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const { data: todoDetail, isLoading, isError, error } = useTodoDetail(Number(id), {
+    enabled: !!id,
+  });
+  const { setLoading } = useLoadingStore();
+
+  useEffect(() => {
+    if (isLoading) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+  }, [id, isLoading, setLoading]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error: {error.message}</div>;
+  }
   
   const onGoBack = () => {
     navigate(-1);
@@ -61,6 +82,7 @@ export function ExampleDetail() {
   return (
     <div>
       <h2>Todo detail {id}</h2>
+      <p>{todoDetail?.title}</p>
       <button onClick={onGoBack}>Go back</button>
     </div>
   );

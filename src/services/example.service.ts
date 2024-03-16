@@ -13,4 +13,8 @@ export const exampleService = {
     const response = await axiosCustom.get<Todo[]>(API_EXAMPLE_ROUTES.TODO);
     return response.data;
   },
+  async getTodoDetail(id: number): Promise<Todo> {
+    const response = await axiosCustom.get<Todo>(API_EXAMPLE_ROUTES.TODO_DETAIL.replace('{id}', String(id)));
+    return response.data;
+  },
 };
