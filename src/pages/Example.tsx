@@ -1,4 +1,7 @@
 import '@/assets/scss/pages/example.scss';
+import { useTodoList } from '@/hooks/example.hook';
+import { useLoadingStore } from '@/stores/loading.store';
+import { useEffect } from 'react';
 import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
 
 export function ExampleLayout() {
@@ -12,17 +15,35 @@ export function ExampleLayout() {
 }
 
 export function ExampleIndex() {
+  const { data: todoList, isLoading, isError, error } = useTodoList();
+  const { setLoading } = useLoadingStore();
+
+  useEffect(() => {
+    if (isLoading) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+  }, [isLoading, setLoading]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
     <div>
-      <h2>Example Index</h2>
+      <h2>Todo list</h2>
       <nav className="nav-example">
         <ul>
-          <li>
-            <Link to="/example/1">Example 1</Link>
-          </li>
-          <li>
-            <Link to="/example/2">Example 2</Link>
-          </li>
+          {todoList?.map((todo) => (
+            <li key={todo.id}>
+              <Link to={`/example/${todo.id}`}>{todo.title}</Link>
+            </li>
+          ))}
         </ul>
       </nav>
     </div>
@@ -39,7 +60,7 @@ export function ExampleDetail() {
 
   return (
     <div>
-      <h2>Example Detail {id}</h2>
+      <h2>Todo detail {id}</h2>
       <button onClick={onGoBack}>Go back</button>
     </div>
   );
