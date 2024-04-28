@@ -1,7 +1,7 @@
 import '@/assets/scss/pages/example.scss';
-import { useTodoList, useTodoDetail } from '@/hooks/example.hook';
+import { usePeopleList, useTodoDetail, useTodoList } from '@/hooks/example.hook';
 import { useLoadingStore } from '@/stores/loading.store';
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
 
 export function ExampleLayout() {
@@ -16,15 +16,52 @@ export function ExampleLayout() {
 
 export function ExampleIndex() {
   const { data: todoList, isLoading, isError, error } = useTodoList();
-  const { setLoading } = useLoadingStore();
+  const {
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isPending: pIsPending,
+    isFetching: pIsFetching,
+    isError: pIsError,
+    data: pData,
+    error: pError,
+  } = usePeopleList();
 
+  const { setLoading } = useLoadingStore();
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading || pIsFetching) {
       setLoading(true);
     } else {
       setLoading(false);
     }
-  }, [isLoading, setLoading]);
+  }, [isLoading, setLoading, pIsFetching]);
+
+  const loadPeople = () => {
+    return pIsPending ? (<p>Loading...</p>) : pIsError ? (<p>Error: {pError.message}</p>) : (
+      <>
+        {pData.pages.map((group, i) => (
+          <Fragment key={i}>
+            {group.results.map((project, j) => (
+              <p key={j}>{project.name}</p>
+            ))}
+          </Fragment>
+        ))}
+        <div>
+          <button
+            onClick={() => fetchNextPage()}
+            disabled={!hasNextPage || isFetchingNextPage}
+          >
+            {isFetchingNextPage
+              ? 'Loading more...'
+              : hasNextPage
+                ? 'Load More'
+                : 'Nothing more to load'}
+          </button>
+        </div>
+        <div>{pIsFetching && !isFetchingNextPage ? 'Fetching...' : null}</div>
+      </>
+    );
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -46,6 +83,7 @@ export function ExampleIndex() {
           ))}
         </ul>
       </nav>
+      {loadPeople()}
     </div>
   );
 }
